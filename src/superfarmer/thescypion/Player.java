@@ -1,61 +1,18 @@
 package superfarmer.thescypion;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Player {
-
-	public class Animals {
-		public Integer rabbits=0;
-		public Integer sheeps=0;
-		public Integer pigs=0;
-		public Integer cows=0;
-		public Integer horses=0;
-		public Integer smallDog=0;
-		public Integer bigDog=0;
-		
-		public Animals(Integer r, Integer s, Integer p, Integer c, Integer h, Integer sd, Integer bd) {
-			rabbits=r;
-			sheeps=s;
-			pigs=p;
-			cows=c;
-			horses=h;
-			smallDog=sd;
-			bigDog=bd;
-		}
-
-		
-		public Animals() {
-		}
-		
-		@Override
-		public String toString() {
-			String result = new String();
-			result += "Króliki: " + rabbits.toString() + "\n";
-			result += "Owce: " + sheeps.toString() + "\n";
-			result += "Świnie: " + pigs.toString() + "\n";
-			result += "Krowy: " + cows.toString() + "\n";
-			result += "Konie: " + horses.toString() + "\n";
-			result += "Małe psy: " + smallDog.toString() + "\n";
-			result += "Duże psy: " + bigDog.toString() + "\n";
-			return result;
-		}
-		
-	}
-	
-	private Animals animals;
+	private Map<Animals, Integer> animals;
 	private String name;
 	
 	public Player() {
-		animals = new Animals();
+		animals = new HashMap<Animals, Integer>();
+		for(Animals animal : Animals.values()) {
+			animals.put(animal, 0);
+		}
 		name = new String("Brak");
-	}
-	
-	public Player( String n, Animals a) {
-		name = n;
-		animals = a;
-	}
-	
-	public Player(String n,Integer r, Integer s, Integer p, Integer c, Integer h, Integer sd, Integer bd) {
-		name = n;
-		animals = new Animals(r,s,p,c,h,sd,bd);
 	}
 	
 	@Override
@@ -66,5 +23,37 @@ public class Player {
 		return result;
 	}
 	
-	
+	public void processRoll(Animals[] rollResult) {
+		if(rollResult[0] == Animals.WOLF || rollResult[1] == Animals.WOLF) {
+			Integer bigDogNumber = animals.get(Animals.BIGDOG);
+			if(bigDogNumber > 0) {
+				animals.put(Animals.BIGDOG, bigDogNumber-1);
+			} else {
+				animals.put(Animals.RABBIT, 0);
+				animals.put(Animals.SHEEP, 0);
+				animals.put(Animals.PIG, 0);
+				animals.put(Animals.COW, 0);
+			}
+		}
+		else if(rollResult[0] == Animals.FOX || rollResult[1] == Animals.FOX) {
+			Integer smallDogNumber = animals.get(Animals.SMALLDOG);
+			if(smallDogNumber > 0) {
+				animals.put(Animals.BIGDOG, smallDogNumber-1);
+			} else {
+				animals.put(Animals.RABBIT, 0);
+			}
+		} 
+		else if(rollResult[0] != rollResult[1]){
+			for(Animals animal : rollResult) {
+				Integer numberOfAnimals = animals.get(animal);
+				Integer factor = Math.floorDiv(numberOfAnimals+1, 2);
+				animals.put(animal, numberOfAnimals+factor);
+			}
+		}
+		else {
+			Integer numberOfAnimals = animals.get(rollResult[0]);
+			Integer factor = Math.floorDiv(numberOfAnimals+2, 2);
+			animals.put(rollResult[0], numberOfAnimals+factor);
+		}
+	}
 }
